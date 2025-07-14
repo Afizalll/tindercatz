@@ -237,6 +237,7 @@
             overflow: hidden;
             cursor: grab;
             transition: transform 0.3s ease;
+            touch-action: none;
         }
 
         .card.dragging {
@@ -601,6 +602,7 @@
                 this.currentY = 0;
                 this.cardStartX = 0;
                 this.appStarted = false;
+                this.currentCardElement = null;
                 
                 // Fixed predefined cat data - completely deterministic
                 this.predefinedCats = [
@@ -771,6 +773,7 @@
                 }
                 
                 const card = this.createCard(this.cats[this.currentIndex]);
+                this.currentCardElement = card;
                 this.swipeArea.appendChild(card);
                 
                 // Add entrance animation
@@ -786,6 +789,7 @@
                 card.style.transform = 'scale(0.8)';
                 card.style.opacity = '0';
                 card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+                card.dataset.catId = cat.id;
                 
                 card.innerHTML = `
                     <img src="${cat.url}" alt="${cat.name}" loading="lazy" onerror="this.style.opacity=0.7;">
@@ -813,13 +817,15 @@
             
             handleTouchStart(e) {
                 e.preventDefault();
-                this.startDrag(e.touches[0].clientX, e.touches[0].clientY, e.target.closest('.card'));
+                const touch = e.touches[0];
+                this.startDrag(touch.clientX, touch.clientY, e.target.closest('.card'));
             }
             
             handleTouchMove(e) {
                 e.preventDefault();
-                if (this.isDragging) {
-                    this.updateDrag(e.touches[0].clientX, e.touches[0].clientY);
+                if (this.isDragging && e.touches.length > 0) {
+                    const touch = e.touches[0];
+                    this.updateDrag(touch.clientX, touch.clientY);
                 }
             }
             
@@ -843,19 +849,20 @@
             }
             
             startDrag(x, y, card) {
+                if (!card) return;
+                
                 this.isDragging = true;
                 this.startX = x;
                 this.startY = y;
-                this.currentCard = card;
+                this.currentX = 0;
+                this.currentY = 0;
                 this.cardStartX = 0;
                 
-                if (card) {
-                    card.classList.add('dragging');
-                }
+                card.classList.add('dragging');
             }
             
             updateDrag(x, y) {
-                if (!this.isDragging || !this.currentCard) return;
+                if (!this.isDragging || !this.currentCardElement) return;
                 
                 this.currentX = x - this.startX;
                 this.currentY = y - this.startY;
@@ -863,7 +870,7 @@
                 const rotation = this.currentX * 0.1;
                 const opacity = Math.abs(this.currentX) > 50 ? 0.8 : 0;
                 
-                this.currentCard.style.transform = `translateX(${this.currentX}px) translateY(${this.currentY}px) rotate(${rotation}deg)`;
+                this.currentCardElement.style.transform = `translateX(${this.currentX}px) translateY(${this.currentY}px) rotate(${rotation}deg)`;
                 
                 // Show swipe indicator
                 if (Math.abs(this.currentX) > 50) {
@@ -876,10 +883,10 @@
             }
             
             endDrag() {
-                if (!this.isDragging || !this.currentCard) return;
+                if (!this.isDragging || !this.currentCardElement) return;
                 
                 this.isDragging = false;
-                this.currentCard.classList.remove('dragging');
+                this.currentCardElement.classList.remove('dragging');
                 
                 const threshold = 100;
                 const shouldSwipe = Math.abs(this.currentX) > threshold;
@@ -889,22 +896,16 @@
                     this.swipeCard(isLike);
                 } else {
                     // Snap back
-                    this.currentCard.style.transform = 'translateX(0px) translateY(0px) rotate(0deg)';
+                    this.currentCardElement.style.transform = 'translateX(0px) translateY(0px) rotate(0deg)';
                     this.swipeIndicator.style.opacity = 0;
                 }
                 
-                this.currentCard = null;
                 this.currentX = 0;
                 this.currentY = 0;
             }
             
             swipeCard(isLike) {
-                const card = this.currentCard || this.swipeArea.querySelector('.card');
-                if (!card) return;
-                
-                
                 const currentCat = this.cats[this.currentIndex];
-                
                 
                 const catForStorage = {
                     id: currentCat.id,
@@ -917,10 +918,10 @@
                 
                 if (isLike) {
                     this.likedCats.push(catForStorage);
-                    this.animateCardExit(card, 'like');
+                    this.animateCardExit('like');
                 } else {
                     this.dislikedCats.push(catForStorage);
-                    this.animateCardExit(card, 'dislike');
+                    this.animateCardExit('dislike');
                 }
                 
                 this.currentIndex++;
@@ -932,11 +933,12 @@
                 }, 300);
             }
             
-            animateCardExit(card, type) {
-                const direction = type === 'like' ? 1 : -1;
-                card.style.transform = `translateX(${direction * 100}vw) rotate(${direction * 30}deg)`;
-                card.style.opacity = '0';
+            animateCardExit(type) {
+                if (!this.currentCardElement) return;
                 
+                const direction = type === 'like' ? 1 : -1;
+                this.currentCardElement.style.transform = `translateX(${direction * 100}vw) rotate(${direction * 30}deg)`;
+                this.currentCardElement.style.opacity = '0';
                 
                 this.swipeIndicator.style.opacity = 1;
                 this.swipeIndicator.className = `swipe-indicator ${type}`;
@@ -961,7 +963,6 @@
             }
             
             displayLikedCats() {
-               
                 this.likedCatsContainer.innerHTML = '';
                 
                 if (this.likedCats.length === 0) {
@@ -972,15 +973,12 @@
                     return;
                 }
                 
-                
                 const fragment = document.createDocumentFragment();
-                
                 
                 this.likedCats.forEach((cat, index) => {
                     const catElement = document.createElement('div');
                     catElement.className = 'liked-cat';
                     catElement.style.animationDelay = `${index * 0.1}s`;
-                    
                     
                     catElement.innerHTML = `
                         <img src="${cat.url}" alt="${cat.name}" loading="lazy" onerror="this.style.opacity=0.7;">
@@ -990,11 +988,7 @@
                     fragment.appendChild(catElement);
                 });
                 
-                
                 this.likedCatsContainer.appendChild(fragment);
-                
-                
-                this.likedCatsContainer.offsetHeight;
             }
             
             restart() {
@@ -1009,15 +1003,12 @@
                 
                 this.progressFill.style.width = '0%';
                 
-                
                 const existingCard = this.swipeArea.querySelector('.card');
                 if (existingCard) {
                     existingCard.remove();
                 }
                 
-               
                 this.likedCatsContainer.innerHTML = '';
-                
                 
                 this.loadCats();
             }
@@ -1028,11 +1019,9 @@
                 this.dislikeBtn.addEventListener('click', () => this.swipeCard(false));
                 this.restartBtn.addEventListener('click', () => this.restart());
                 
-                
                 document.addEventListener('dragstart', (e) => e.preventDefault());
             }
         }
-        
         
         document.addEventListener('DOMContentLoaded', () => {
             new CatSwipeApp();
