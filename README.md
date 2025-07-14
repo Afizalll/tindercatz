@@ -20,7 +20,7 @@ This task was built to help discover what kind of cats or kittens a user prefers
 
 ## 🚀 Live Demo
 
-👉 [Click here to view the app](https://afizalll.github.io/tindercatz) (GitHub Pages)
+👉 [Click here to view the app](https://afizalll.github.io/tindercatz/) (GitHub Pages)
 
 ## 🛠️ Tech Stack
 
