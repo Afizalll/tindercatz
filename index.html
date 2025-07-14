@@ -604,7 +604,6 @@
                 this.appStarted = false;
                 this.currentCardElement = null;
                 
-                // Fixed predefined cat data - completely deterministic
                 this.predefinedCats = [
                     { id: 1, name: 'Name: Whiskers', seed: 'cat1' },
                     { id: 2, name: 'Name: Luna', seed: 'cat2' },
@@ -666,7 +665,6 @@
             
             async loadCats() {
                 try {
-                    // Use predefined cat data with deterministic URLs
                     const promises = this.predefinedCats.map(catData => 
                         this.loadCatImage(catData)
                     );
@@ -684,7 +682,6 @@
 
             async loadCatImage(catData) {
                 return new Promise((resolve) => {
-                    // Create completely deterministic URL using the predefined seed
                     const imageUrl = `https://cataas.com/cat?width=400&height=400&seed=${catData.seed}`;
                     
                     const img = new Image();
@@ -700,7 +697,6 @@
                     };
                     
                     const handleError = () => {
-                        // Create fallback with same seed for consistency
                         const fallbackUrl = this.generateFallbackImage(catData.name, catData.id);
                         resolve({
                             id: catData.id,
@@ -715,7 +711,6 @@
                     img.onload = handleLoad;
                     img.onerror = handleError;
                     
-                    // Add timeout for slow connections
                     setTimeout(() => {
                         if (!img.complete) {
                             img.onload = null;
@@ -734,26 +729,26 @@
                 canvas.height = 400;
                 const ctx = canvas.getContext('2d');
                 
-                // Create deterministic colors based on ID
+                
                 const hue = (id * 137.508) % 360;
                 const saturation = 60 + (id % 3) * 15;
                 const lightness = 70 + (id % 2) * 10;
                 
-                // Background gradient
+                
                 const gradient = ctx.createLinearGradient(0, 0, 400, 400);
                 gradient.addColorStop(0, `hsl(${hue}, ${saturation}%, ${lightness}%)`);
                 gradient.addColorStop(1, `hsl(${(hue + 30) % 360}, ${saturation}%, ${lightness - 10}%)`);
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, 400, 400);
                 
-                // Cat emoji
+                
                 ctx.font = '120px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#333';
                 ctx.fillText('🐱', 200, 180);
                 
-                // Name
+            
                 ctx.font = 'bold 20px Arial';
                 ctx.fillStyle = '#333';
                 ctx.fillText(name, 200, 320);
@@ -776,7 +771,7 @@
                 this.currentCardElement = card;
                 this.swipeArea.appendChild(card);
                 
-                // Add entrance animation
+                
                 setTimeout(() => {
                     card.style.transform = 'scale(1)';
                     card.style.opacity = '1';
@@ -803,12 +798,12 @@
             }
             
             setupCardEvents(card) {
-                // Touch events
+                
                 card.addEventListener('touchstart', this.handleTouchStart.bind(this), {passive: false});
                 card.addEventListener('touchmove', this.handleTouchMove.bind(this), {passive: false});
                 card.addEventListener('touchend', this.handleTouchEnd.bind(this), {passive: false});
                 
-                // Mouse events
+               
                 card.addEventListener('mousedown', this.handleMouseDown.bind(this));
                 card.addEventListener('mousemove', this.handleMouseMove.bind(this));
                 card.addEventListener('mouseup', this.handleMouseUp.bind(this));
@@ -872,7 +867,7 @@
                 
                 this.currentCardElement.style.transform = `translateX(${this.currentX}px) translateY(${this.currentY}px) rotate(${rotation}deg)`;
                 
-                // Show swipe indicator
+                
                 if (Math.abs(this.currentX) > 50) {
                     this.swipeIndicator.style.opacity = opacity;
                     this.swipeIndicator.className = `swipe-indicator ${this.currentX > 0 ? 'like' : 'dislike'}`;
@@ -895,7 +890,7 @@
                     const isLike = this.currentX > 0;
                     this.swipeCard(isLike);
                 } else {
-                    // Snap back
+                   
                     this.currentCardElement.style.transform = 'translateX(0px) translateY(0px) rotate(0deg)';
                     this.swipeIndicator.style.opacity = 0;
                 }
