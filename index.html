@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Swipe - Find Your Purr-fect Match</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Intro Screen Styles */
+        .intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .intro-screen.hidden {
+            display: none;
+        }
+
+        .intro-logo {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .intro-title {
+            font-size: 32px;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .intro-subtitle {
+            font-size: 18px;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .intro-instructions {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+
+        .instruction-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .swipe-demo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .swipe-direction {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .swipe-arrow {
+            font-size: 30px;
+            margin-bottom: 5px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .swipe-arrow.left {
+            animation-delay: 0s;
+        }
+
+        .swipe-arrow.right {
+            animation-delay: 1s;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+        }
+
+        .swipe-label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .demo-cat {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .start-button:active {
+            transform: translateY(-1px);
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .swipe-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            position: absolute;
+            width: 90%;
+            height: 70%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            cursor: grab;
+            transition: transform 0.3s ease;
+        }
+
+        .card.dragging {
+            cursor: grabbing;
+            transition: none;
+        }
+
+        .card img {
+            width: 100%;
+            height: 85%;
+            object-fit: cover;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .card-info {
+            padding: 15px;
+            background: white;
+            text-align: center;
+            height: 15%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-info h3 {
+            color: #333;
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            flex-direction: column;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-around;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .dislike-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .like-btn {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .swipe-indicator.like {
+            color: #4ecdc4;
+        }
+
+        .swipe-indicator.dislike {
+            color: #ff6b6b;
+        }
+
+        .summary {
+            display: none;
+            padding: 30px;
+            text-align: center;
+            color: white;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .summary h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .summary-stats {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .liked-cats-container {
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .liked-cats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 330px;
+            min-height: 150px;
+        }
+
+        .liked-cat {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            width: 150px;
+            margin: 0;
+        }
+
+        .liked-cat:hover {
+            transform: translateY(-5px);
+        }
+
+        .liked-cat img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .liked-cat p {
+            padding: 10px;
+            color: #333;
+            font-size: 14px;
+            text-align: center;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .no-cats-message {
+            color: rgba(255,255,255,0.8);
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+                border-radius: 0;
+                height: 100vh;
+            }
+            
+            .card {
+                width: 95%;
+                height: 75%;
+            }
+            
+            .liked-cats {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+                max-width: 250px;
+            }
+
+            .liked-cat {
+                width: 120px;
+            }
+
+            .liked-cat img {
+                height: 100px;
+            }
+
+            .intro-logo {
+                font-size: 60px;
+            }
+
+            .intro-title {
+                font-size: 24px;
+            }
+
+            .intro-instructions {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Intro Screen -->
+        <div class="intro-screen" id="introScreen">
+            <div class="intro-logo">🐱</div>
+            <h1 class="intro-title">Cat Swipe</h1>
+            <p class="intro-subtitle">Find your purr-fect match!</p>
+            
+            <div class="intro-instructions">
+                <div class="instruction-item">
+                    <span class="instruction-icon">👆</span>
+                    <span>Swipe or drag the cards</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="instruction-icon">📱</span>
+                    <span>Or use the buttons below</span>
+                </div>
+            </div>
+
+            <div class="swipe-demo">
+                <div class="swipe-direction">
+                    <div class="swipe-arrow left">👈</div>
+                    <div class="swipe-label">Swipe Left</div>
+                    <div style="font-size: 12px; margin-top: 5px;">😿 Dislike</div>
+                </div>
+                
+                <div class="demo-cat">🐱</div>
+                
+                <div class="swipe-direction">
+                    <div class="swipe-arrow right">👉</div>
+                    <div class="swipe-label">Swipe Right</div>
+                    <div style="font-size: 12px; margin-top: 5px;">😸 Like</div>
+                </div>
+            </div>
+
+            <button class="start-button" id="startButton">
+                Start Swiping
+            </button>
+        </div>
+
+        <!-- Main App -->
+        <div class="header">
+            <h1>🐱 Cat Swipe</h1>
+            <p>Find your purr-fect match!</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        
+        <div class="swipe-area" id="swipeArea">
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading adorable cats...</p>
+            </div>
+            <div class="swipe-indicator" id="swipeIndicator"></div>
+        </div>
+        
+        <div class="action-buttons" id="actionButtons" style="display: none;">
+            <button class="action-btn dislike-btn" id="dislikeBtn">😿</button>
+            <button class="action-btn like-btn" id="likeBtn">😸</button>
+        </div>
+        
+        <div class="summary" id="summary">
+            <h2>🎉 Swiping Complete!</h2>
+            <div class="summary-stats">
+                <div class="stat">Total Cats: <span id="totalCats">0</span></div>
+                <div class="stat">Liked: <span id="likedCount">0</span></div>
+                <div class="stat">Disliked: <span id="dislikedCount">0</span></div>
+            </div>
+            <h3>Your Liked Cats:</h3>
+            <div class="liked-cats-container">
+                <div class="liked-cats" id="likedCats"></div>
+            </div>
+            <button class="restart-btn" id="restartBtn">Swipe More Cats</button>
+        </div>
+    </div>
+
+    <script>
+        class CatSwipeApp {
+            constructor() {
+                this.cats = [];
+                this.currentIndex = 0;
+                this.likedCats = [];
+                this.dislikedCats = [];
+                this.totalCats = 20;
+                this.isDragging = false;
+                this.startX = 0;
+                this.startY = 0;
+                this.currentX = 0;
+                this.currentY = 0;
+                this.cardStartX = 0;
+                this.appStarted = false;
+                
+                // Fixed predefined cat data - completely deterministic
+                this.predefinedCats = [
+                    { id: 1, name: 'Name: Whiskers', seed: 'cat1' },
+                    { id: 2, name: 'Name: Luna', seed: 'cat2' },
+                    { id: 3, name: 'Name: Shadow', seed: 'cat3' },
+                    { id: 4, name: 'Name: Mittens', seed: 'cat4' },
+                    { id: 5, name: 'Name: Simba', seed: 'cat5' },
+                    { id: 6, name: 'Name: Bella', seed: 'cat6' },
+                    { id: 7, name: 'Name: Oliver', seed: 'cat7' },
+                    { id: 8, name: 'Name: Chloe', seed: 'cat8' },
+                    { id: 9, name: 'Name: Max', seed: 'cat9' },
+                    { id: 10, name: 'Name: Lucy', seed: 'cat10' },
+                    { id: 11, name: 'Name: Charlie', seed: 'cat11' },
+                    { id: 12, name: 'Name: Lily', seed: 'cat12' },
+                    { id: 13, name: 'Name: Milo', seed: 'cat13' },
+                    { id: 14, name: 'Name: Coco', seed: 'cat14' },
+                    { id: 15, name: 'Name: Leo', seed: 'cat15' },
+                    { id: 16, name: 'Name: Nala', seed: 'cat16' },
+                    { id: 17, name: 'Name: Smokey', seed: 'cat17' },
+                    { id: 18, name: 'Name: Princess', seed: 'cat18' },
+                    { id: 19, name: 'Name: Tiger', seed: 'cat19' },
+                    { id: 20, name: 'Name: Angel', seed: 'cat20' }
+                ];
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.showIntro();
+            }
+            
+            initializeElements() {
+                this.introScreen = document.getElementById('introScreen');
+                this.startButton = document.getElementById('startButton');
+                this.swipeArea = document.getElementById('swipeArea');
+                this.loading = document.getElementById('loading');
+                this.actionButtons = document.getElementById('actionButtons');
+                this.summary = document.getElementById('summary');
+                this.likeBtn = document.getElementById('likeBtn');
+                this.dislikeBtn = document.getElementById('dislikeBtn');
+                this.restartBtn = document.getElementById('restartBtn');
+                this.swipeIndicator = document.getElementById('swipeIndicator');
+                this.progressFill = document.getElementById('progressFill');
+                this.likedCatsContainer = document.getElementById('likedCats');
+            }
+
+            showIntro() {
+                this.introScreen.classList.remove('hidden');
+            }
+
+            hideIntro() {
+                this.introScreen.classList.add('hidden');
+                this.startApp();
+            }
+
+            startApp() {
+                if (!this.appStarted) {
+                    this.appStarted = true;
+                    this.loadCats();
+                }
+            }
+            
+            async loadCats() {
+                try {
+                    // Use predefined cat data with deterministic URLs
+                    const promises = this.predefinedCats.map(catData => 
+                        this.loadCatImage(catData)
+                    );
+                    
+                    this.cats = await Promise.all(promises);
+                    this.loading.style.display = 'none';
+                    this.actionButtons.style.display = 'flex';
+                    this.showCurrentCard();
+                    this.updateProgress();
+                } catch (error) {
+                    console.error('Error loading cats:', error);
+                    this.loading.innerHTML = '<p>Failed to load cats. Please try again.</p>';
+                }
+            }
+
+            async loadCatImage(catData) {
+                return new Promise((resolve) => {
+                    // Create completely deterministic URL using the predefined seed
+                    const imageUrl = `https://cataas.com/cat?width=400&height=400&seed=${catData.seed}`;
+                    
+                    const img = new Image();
+                    
+                    const handleLoad = () => {
+                        resolve({
+                            id: catData.id,
+                            name: catData.name,
+                            url: imageUrl,
+                            seed: catData.seed,
+                            loaded: true
+                        });
+                    };
+                    
+                    const handleError = () => {
+                        // Create fallback with same seed for consistency
+                        const fallbackUrl = this.generateFallbackImage(catData.name, catData.id);
+                        resolve({
+                            id: catData.id,
+                            name: catData.name,
+                            url: fallbackUrl,
+                            seed: catData.seed,
+                            loaded: false,
+                            fallback: true
+                        });
+                    };
+
+                    img.onload = handleLoad;
+                    img.onerror = handleError;
+                    
+                    // Add timeout for slow connections
+                    setTimeout(() => {
+                        if (!img.complete) {
+                            img.onload = null;
+                            img.onerror = null;
+                            handleError();
+                        }
+                    }, 10000);
+                    
+                    img.src = imageUrl;
+                });
+            }
+
+            generateFallbackImage(name, id) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 400;
+                canvas.height = 400;
+                const ctx = canvas.getContext('2d');
+                
+                // Create deterministic colors based on ID
+                const hue = (id * 137.508) % 360;
+                const saturation = 60 + (id % 3) * 15;
+                const lightness = 70 + (id % 2) * 10;
+                
+                // Background gradient
+                const gradient = ctx.createLinearGradient(0, 0, 400, 400);
+                gradient.addColorStop(0, `hsl(${hue}, ${saturation}%, ${lightness}%)`);
+                gradient.addColorStop(1, `hsl(${(hue + 30) % 360}, ${saturation}%, ${lightness - 10}%)`);
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 400, 400);
+                
+                // Cat emoji
+                ctx.font = '120px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#333';
+                ctx.fillText('🐱', 200, 180);
+                
+                // Name
+                ctx.font = 'bold 20px Arial';
+                ctx.fillStyle = '#333';
+                ctx.fillText(name, 200, 320);
+                
+                return canvas.toDataURL();
+            }
+            
+            showCurrentCard() {
+                if (this.currentIndex >= this.cats.length) {
+                    this.showSummary();
+                    return;
+                }
+                
+                const existingCard = this.swipeArea.querySelector('.card');
+                if (existingCard) {
+                    existingCard.remove();
+                }
+                
+                const card = this.createCard(this.cats[this.currentIndex]);
+                this.swipeArea.appendChild(card);
+                
+                // Add entrance animation
+                setTimeout(() => {
+                    card.style.transform = 'scale(1)';
+                    card.style.opacity = '1';
+                }, 50);
+            }
+            
+            createCard(cat) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.transform = 'scale(0.8)';
+                card.style.opacity = '0';
+                card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+                
+                card.innerHTML = `
+                    <img src="${cat.url}" alt="${cat.name}" loading="lazy" onerror="this.style.opacity=0.7;">
+                    <div class="card-info">
+                        <h3>${cat.name}</h3>
+                    </div>
+                `;
+                
+                this.setupCardEvents(card);
+                return card;
+            }
+            
+            setupCardEvents(card) {
+                // Touch events
+                card.addEventListener('touchstart', this.handleTouchStart.bind(this), {passive: false});
+                card.addEventListener('touchmove', this.handleTouchMove.bind(this), {passive: false});
+                card.addEventListener('touchend', this.handleTouchEnd.bind(this), {passive: false});
+                
+                // Mouse events
+                card.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                card.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                card.addEventListener('mouseup', this.handleMouseUp.bind(this));
+                card.addEventListener('mouseleave', this.handleMouseUp.bind(this));
+            }
+            
+            handleTouchStart(e) {
+                e.preventDefault();
+                this.startDrag(e.touches[0].clientX, e.touches[0].clientY, e.target.closest('.card'));
+            }
+            
+            handleTouchMove(e) {
+                e.preventDefault();
+                if (this.isDragging) {
+                    this.updateDrag(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }
+            
+            handleTouchEnd(e) {
+                e.preventDefault();
+                this.endDrag();
+            }
+            
+            handleMouseDown(e) {
+                this.startDrag(e.clientX, e.clientY, e.target.closest('.card'));
+            }
+            
+            handleMouseMove(e) {
+                if (this.isDragging) {
+                    this.updateDrag(e.clientX, e.clientY);
+                }
+            }
+            
+            handleMouseUp() {
+                this.endDrag();
+            }
+            
+            startDrag(x, y, card) {
+                this.isDragging = true;
+                this.startX = x;
+                this.startY = y;
+                this.currentCard = card;
+                this.cardStartX = 0;
+                
+                if (card) {
+                    card.classList.add('dragging');
+                }
+            }
+            
+            updateDrag(x, y) {
+                if (!this.isDragging || !this.currentCard) return;
+                
+                this.currentX = x - this.startX;
+                this.currentY = y - this.startY;
+                
+                const rotation = this.currentX * 0.1;
+                const opacity = Math.abs(this.currentX) > 50 ? 0.8 : 0;
+                
+                this.currentCard.style.transform = `translateX(${this.currentX}px) translateY(${this.currentY}px) rotate(${rotation}deg)`;
+                
+                // Show swipe indicator
+                if (Math.abs(this.currentX) > 50) {
+                    this.swipeIndicator.style.opacity = opacity;
+                    this.swipeIndicator.className = `swipe-indicator ${this.currentX > 0 ? 'like' : 'dislike'}`;
+                    this.swipeIndicator.textContent = this.currentX > 0 ? '😸' : '😿';
+                } else {
+                    this.swipeIndicator.style.opacity = 0;
+                }
+            }
+            
+            endDrag() {
+                if (!this.isDragging || !this.currentCard) return;
+                
+                this.isDragging = false;
+                this.currentCard.classList.remove('dragging');
+                
+                const threshold = 100;
+                const shouldSwipe = Math.abs(this.currentX) > threshold;
+                
+                if (shouldSwipe) {
+                    const isLike = this.currentX > 0;
+                    this.swipeCard(isLike);
+                } else {
+                    // Snap back
+                    this.currentCard.style.transform = 'translateX(0px) translateY(0px) rotate(0deg)';
+                    this.swipeIndicator.style.opacity = 0;
+                }
+                
+                this.currentCard = null;
+                this.currentX = 0;
+                this.currentY = 0;
+            }
+            
+            swipeCard(isLike) {
+                const card = this.currentCard || this.swipeArea.querySelector('.card');
+                if (!card) return;
+                
+                
+                const currentCat = this.cats[this.currentIndex];
+                
+                
+                const catForStorage = {
+                    id: currentCat.id,
+                    name: currentCat.name,
+                    url: currentCat.url,
+                    seed: currentCat.seed,
+                    loaded: currentCat.loaded || false,
+                    fallback: currentCat.fallback || false
+                };
+                
+                if (isLike) {
+                    this.likedCats.push(catForStorage);
+                    this.animateCardExit(card, 'like');
+                } else {
+                    this.dislikedCats.push(catForStorage);
+                    this.animateCardExit(card, 'dislike');
+                }
+                
+                this.currentIndex++;
+                this.updateProgress();
+                
+                setTimeout(() => {
+                    this.swipeIndicator.style.opacity = 0;
+                    this.showCurrentCard();
+                }, 300);
+            }
+            
+            animateCardExit(card, type) {
+                const direction = type === 'like' ? 1 : -1;
+                card.style.transform = `translateX(${direction * 100}vw) rotate(${direction * 30}deg)`;
+                card.style.opacity = '0';
+                
+                
+                this.swipeIndicator.style.opacity = 1;
+                this.swipeIndicator.className = `swipe-indicator ${type}`;
+                this.swipeIndicator.textContent = type === 'like' ? '😸' : '😿';
+            }
+            
+            updateProgress() {
+                const progress = (this.currentIndex / this.totalCats) * 100;
+                this.progressFill.style.width = `${progress}%`;
+            }
+            
+            showSummary() {
+                this.swipeArea.style.display = 'none';
+                this.actionButtons.style.display = 'none';
+                this.summary.style.display = 'block';
+                
+                document.getElementById('totalCats').textContent = this.totalCats;
+                document.getElementById('likedCount').textContent = this.likedCats.length;
+                document.getElementById('dislikedCount').textContent = this.dislikedCats.length;
+                
+                this.displayLikedCats();
+            }
+            
+            displayLikedCats() {
+               
+                this.likedCatsContainer.innerHTML = '';
+                
+                if (this.likedCats.length === 0) {
+                    const message = document.createElement('div');
+                    message.className = 'no-cats-message';
+                    message.textContent = 'No cats liked. They must not have been purr-fect enough! 😸';
+                    this.likedCatsContainer.appendChild(message);
+                    return;
+                }
+                
+                
+                const fragment = document.createDocumentFragment();
+                
+                
+                this.likedCats.forEach((cat, index) => {
+                    const catElement = document.createElement('div');
+                    catElement.className = 'liked-cat';
+                    catElement.style.animationDelay = `${index * 0.1}s`;
+                    
+                    
+                    catElement.innerHTML = `
+                        <img src="${cat.url}" alt="${cat.name}" loading="lazy" onerror="this.style.opacity=0.7;">
+                        <p title="${cat.name}">${cat.name}</p>
+                    `;
+                    
+                    fragment.appendChild(catElement);
+                });
+                
+                
+                this.likedCatsContainer.appendChild(fragment);
+                
+                
+                this.likedCatsContainer.offsetHeight;
+            }
+            
+            restart() {
+                this.currentIndex = 0;
+                this.likedCats = [];
+                this.dislikedCats = [];
+                
+                this.summary.style.display = 'none';
+                this.swipeArea.style.display = 'flex';
+                this.loading.style.display = 'flex';
+                this.actionButtons.style.display = 'none';
+                
+                this.progressFill.style.width = '0%';
+                
+                
+                const existingCard = this.swipeArea.querySelector('.card');
+                if (existingCard) {
+                    existingCard.remove();
+                }
+                
+               
+                this.likedCatsContainer.innerHTML = '';
+                
+                
+                this.loadCats();
+            }
+            
+            setupEventListeners() {
+                this.startButton.addEventListener('click', () => this.hideIntro());
+                this.likeBtn.addEventListener('click', () => this.swipeCard(true));
+                this.dislikeBtn.addEventListener('click', () => this.swipeCard(false));
+                this.restartBtn.addEventListener('click', () => this.restart());
+                
+                
+                document.addEventListener('dragstart', (e) => e.preventDefault());
+            }
+        }
+        
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            new CatSwipeApp();
+        });
+    </script>
+</body>
+</html>
